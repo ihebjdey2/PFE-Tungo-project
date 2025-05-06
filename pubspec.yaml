@@ -1,0 +1,67 @@
+name: reservation_louage_frontend
+description: "A Flutter project for managing car reservations."
+
+publish_to: 'none' # Set to 'none' for private projects.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0" # Compatible avec Flutter SDK version 3.x.
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Gestion de l'état
+  provider: ^6.1.2
+
+  # Requêtes HTTP
+  http: ^1.2.2
+
+  # Stockage sécurisé pour les données sensibles (comme les tokens)
+  flutter_secure_storage: ^9.2.4
+
+  # Stockage local simple pour les préférences utilisateur
+  shared_preferences: ^2.1.5
+
+  # Validation des adresses e-mail
+  email_validator: ^3.0.0
+
+  # Icônes iOS
+  cupertino_icons: ^1.0.8
+
+  logger: ^1.1.0
+  image_picker: ^0.8.7+3
+  intl: ^0.20.2
+
+  google_maps_flutter: ^2.10.0
+  web_socket_channel: ^2.2.0
+
+
+  
+  
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Règles de linting recommandées
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Ajouter des ressources (images, fichiers, etc.) si nécessaire
+  assets:
+   
+   - assets/images/default_avatar.jpg
+
+   
+  # Ajouter des polices personnalisées si nécessaire
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
