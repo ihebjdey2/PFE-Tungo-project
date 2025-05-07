@@ -142,6 +142,6 @@ module.exports = {
     
     getAllSuperviseurs,
     getAllClients,
-    getAllChauffeurs // Ajoute cette ligne
+    getAllChauffeurs 
   };
   

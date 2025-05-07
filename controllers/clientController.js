@@ -47,7 +47,7 @@ exports.signup = async (req, res) => {
       nom,
       prenom,
       email,
-      motDePasse: hashedPassword,
+      motDePasse,
       role: 'Client',
       numeroDeTelephone,
       image,
@@ -76,28 +76,21 @@ exports.signup = async (req, res) => {
 };
 
 
-// Connexion Client
 exports.signin = async (req, res) => {
   const { email, motDePasse } = req.body;
 
   try {
-    // Validation des champs obligatoires
     if (!email || !motDePasse) {
+      console.log("❌ Champs manquants :", { email, motDePasse });
       return res.status(400).json({ message: 'Email et mot de passe sont requis.' });
     }
 
     const utilisateur = await Utilisateur.findOne({ where: { email, role: 'Client' } });
-    if (!utilisateur) {
-      return res.status(400).json({ message: "Identifiants incorrects." });
-    }
+    if (!utilisateur) return res.status(400).json({ message: 'Identifiants incorrects.' });
 
-    // Vérification du mot de passe
     const isMatch = await bcrypt.compare(motDePasse, utilisateur.motDePasse);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Identifiants incorrects." });
-    }
+    if (!isMatch) return res.status(400).json({ message: 'Identifiants incorrects.' });
 
-    // Génération d'un token JWT
     const token = jwt.sign(
       { id: utilisateur.id, role: utilisateur.role },
       process.env.JWT_SECRET_KEY,

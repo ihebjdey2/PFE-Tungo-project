@@ -10,6 +10,9 @@ const Superviseur = require('../models/Superviseur');
 const Station = require('../models/Station');
 const Ville = require('../models/Ville');
 
+const permissions = require('../config/permissions');
+
+
 const loginAdmin = async (req, res) => {
   const { email, password } = req.body;
   const adminEmail = process.env.ADMIN_EMAIL;
@@ -22,7 +25,7 @@ const loginAdmin = async (req, res) => {
   // 🔹 Cas 1 : Admin principal (environnement)
   if (email === adminEmail && password === adminPassword) {
     const token = jwt.sign(
-      { id: 1, role: 'Administrateur' },
+      { id: 1, role: 'SuperAdmin' },
       process.env.JWT_SECRET_KEY,
       { expiresIn: '1h' }
     );
@@ -30,8 +33,11 @@ const loginAdmin = async (req, res) => {
     return res.status(200).json({
       message: 'Connexion réussie (admin principal)',
       token,
+      role: 'SuperAdmin',
+      permissions: permissions['SuperAdmin'],
       isAdmin: true
     });
+    
   }
 
   try {
@@ -55,12 +61,15 @@ const loginAdmin = async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Connexion réussie',
       token,
+      role: utilisateur.role,
+      permissions: permissions[utilisateur.role],
       utilisateur,
       isAdmin: true
     });
+    
   } catch (err) {
     console.error('Erreur lors de la connexion administrateur:', err.message);
     res.status(500).json({ message: 'Erreur interne du serveur.' });
@@ -71,9 +80,9 @@ const ajouterAdministrateur = async (req, res) => {
   const { nom, prenom, email, motDePasse, numeroDeTelephone } = req.body;
   const image = req.file?.filename;
 
-  // 🔒 Autoriser uniquement l'administrateur principal
-  if (role !== 'Administrateur' || id !== 1) {
-    return res.status(403).json({ message: "Seul l'administrateur principal peut ajouter d'autres administrateurs." });
+  // 🔒 Autoriser uniquement le SuperAdmin
+  if (role !== 'SuperAdmin' || id !== 1) {
+    return res.status(403).json({ message: "Seul le SuperAdmin peut ajouter d'autres administrateurs." });
   }
 
   try {
@@ -92,8 +101,8 @@ const ajouterAdministrateur = async (req, res) => {
       nom,
       prenom,
       email,
-      motDePasse,
-      role: 'Administrateur',
+      motDePasse, 
+      role: 'Administrateur', // ✅ Administrateur classique
       numeroDeTelephone,
       image
     });
@@ -106,6 +115,7 @@ const ajouterAdministrateur = async (req, res) => {
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
+
 
 
 const ajouterSuperviseur = async (req, res) => {
@@ -292,69 +302,63 @@ const getDestinationsBySuperviseur = async (req, res) => {
   }
 };
 
-  const getMe = async (req, res) => {
+const getMe = async (req, res) => {
   const { id, role } = req.user;
   const adminEmail = process.env.ADMIN_EMAIL;
 
   try {
-    if (role !== 'Administrateur') {
-      return res.status(403).json({ message: "Accès non autorisé." });
-    }
-
-    if (id === 1) {
-      // Administrateur principal depuis .env
+    // ✅ Vérifier si l'utilisateur est le SuperAdmin (ID 1 et rôle SuperAdmin)
+    if (id === 1 && role === 'SuperAdmin') {
       return res.status(200).json({
         id: 1,
-        nom: "Admin",
-        prenom: "Principal",
+        nom: "Super",
+        prenom: "Admin",
         email: adminEmail,
-        role: "Administrateur"
+        role: "SuperAdmin"
       });
     }
 
-    // Autres administrateurs dans la base de données
-    const utilisateur = await Utilisateur.findOne({
-      where: { id, role: 'Administrateur' },
-      attributes: { exclude: ['motDePasse'] },
-    });
+    // ✅ Vérifier si l'utilisateur est un Administrateur dans la base de données
+    if (role === 'Administrateur') {
+      const utilisateur = await Utilisateur.findOne({
+        where: { id, role: 'Administrateur' },
+        attributes: { exclude: ['motDePasse'] },
+      });
 
-    if (!utilisateur) {
-      return res.status(404).json({ message: "Administrateur introuvable." });
+      if (!utilisateur) {
+        return res.status(404).json({ message: "Administrateur introuvable." });
+      }
+
+      return res.status(200).json(utilisateur);
     }
 
-    res.status(200).json(utilisateur);
+    // 🚫 Si l'utilisateur n'est ni SuperAdmin ni Administrateur
+    return res.status(403).json({ message: "Accès non autorisé." });
+
   } catch (error) {
-    console.error("Erreur getMe:", error.message);
+    console.error("Erreur lors de la récupération du profil (getMe) :", error.message);
     res.status(500).json({ message: "Erreur interne du serveur." });
   }
 };
+
 
 
 const updateProfile = async (req, res) => {
   const { id, role } = req.user;
   const { prenom, nom, email, motDePasse, numeroDeTelephone } = req.body;
   const image = req.file?.filename;
-  const adminPassword = process.env.ADMIN_PASSWORD;
 
   try {
-    if (role !== 'Administrateur') {
-      return res.status(403).json({ message: "Accès refusé." });
+    // 🚫 Limiter l'accès uniquement aux administrateurs normaux (pas SuperAdmin)
+    if (role !== 'Administrateur' || id === 1) {
+      return res.status(403).json({ message: "Seuls les administrateurs normaux peuvent mettre à jour leur profil." });
     }
 
-    // 🔹 Admin principal
-    if (id === 1) {
-      if (email) process.env.ADMIN_EMAIL = email;
-      if (motDePasse) process.env.ADMIN_PASSWORD = motDePasse;
-
-      return res.status(200).json({
-        message: "Le profil de l'administrateur principal a été mis à jour (en mémoire uniquement)."
-      });
-    }
-
-    // 🔹 Autres admins
+    // 🔍 Vérifier l'existence de l'administrateur dans la base de données
     const utilisateur = await Utilisateur.findOne({ where: { id, role: 'Administrateur' } });
     if (!utilisateur) return res.status(404).json({ message: "Administrateur introuvable." });
 
+    // 📝 Mettre à jour les champs modifiés
     if (prenom) utilisateur.prenom = prenom;
     if (nom) utilisateur.nom = nom;
     if (email) utilisateur.email = email;
@@ -370,6 +374,7 @@ const updateProfile = async (req, res) => {
       utilisateur.image = image;
     }
 
+    // 💾 Sauvegarder les modifications
     await utilisateur.save();
     res.status(200).json({ message: "Profil administrateur mis à jour avec succès.", utilisateur });
 
@@ -378,6 +383,7 @@ const updateProfile = async (req, res) => {
     res.status(500).json({ message: "Erreur interne du serveur." });
   }
 };
+
 
 
 const getAllVilles = async (req, res) => {
