@@ -21,7 +21,7 @@ const Reservation = sequelize.define('Reservation', {
   },
   chauffeur_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: Chauffeur,
       key: 'utilisateur_id',
@@ -29,7 +29,7 @@ const Reservation = sequelize.define('Reservation', {
   },
   vehicule_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: Vehicule,
       key: 'id',
@@ -51,6 +51,11 @@ const Reservation = sequelize.define('Reservation', {
       key: 'id',
     },
   },
+  type_reservation: {
+    type: DataTypes.ENUM('place', 'vehicule'),
+    allowNull: false,
+    defaultValue: 'place',
+  },
   statut: {
     type: DataTypes.ENUM('en_attente', 'confirmée', 'en_cours', 'terminée', 'annulée'),
     allowNull: false,
@@ -63,11 +68,20 @@ const Reservation = sequelize.define('Reservation', {
   },
   prix: {
     type: DataTypes.FLOAT,
-    allowNull: false,
+    allowNull: true,
   },
+  date_reservation: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  heure_depart: {
+    type: DataTypes.TIME,
+    allowNull: true,
+  },
+  
   nombre_places: { // 🔹 Ajout pour la réservation multiple
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     defaultValue: 1,
   }
 }, {

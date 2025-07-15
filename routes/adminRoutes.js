@@ -9,8 +9,6 @@ const verifyPermission = require('../middleware/verifyPermission');
 
 
 
-// 🔹 Admin Login
-router.post('/login', adminController.loginAdmin);
 // 🔹 Ajouter un nouvel administrateur
 router.post('/ajouter-admin', authenticateToken, verifySuperAdmin, verifyPermission('create_admin'), upload.single('image'),adminController.ajouterAdministrateur);
 // 🔹 Ajouter un nouveau superviseur

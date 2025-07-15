@@ -6,6 +6,7 @@ const router = express.Router();
 
 
 router.post('/Client/create', authenticateToken,verifyRole('Client'), reservationController.createReservation);
+router.post('/Client/create/vehicule', authenticateToken,verifyRole('Client'), reservationController.createPrivateReservation);
 router.post('/Client/cancel', authenticateToken,verifyRole('Client'), reservationController.cancelReservation);
 router.get('/Client/current', authenticateToken,verifyRole('Client'), reservationController.getCurrentReservation);
 router.get('/Client/history', authenticateToken,verifyRole('Client'), reservationController.getReservationHistory);

@@ -46,6 +46,14 @@ const ChauffeurPosition = sequelize.define('ChauffeurPosition', {
     },
     
   },
+  latitude: {
+    type: DataTypes.DOUBLE,
+    allowNull: true
+  },
+  longitude: {
+    type: DataTypes.DOUBLE,
+    allowNull: true
+  },
   priorite: {
     type: DataTypes.INTEGER,
     allowNull: false,

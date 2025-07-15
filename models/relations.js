@@ -10,6 +10,7 @@ const Ville = require('./Ville');
 const Station = require('./Station');
 const Superviseur = require('./Superviseur');
 const Reservation = require('./Reservation');
+const Colis = require('./Colis');
 
 
 module.exports = () => {
@@ -79,6 +80,20 @@ Reservation.belongsTo(Itineraire, { foreignKey: 'itineraire_id', as: 'Itineraire
 Station.hasMany(Superviseur, { foreignKey: 'station_id', onDelete: 'CASCADE' });
 Superviseur.belongsTo(Station, { foreignKey: 'station_id', onDelete: 'CASCADE' });
 
+
+
+
+Client.hasMany(Colis, { foreignKey: 'client_id', onDelete: 'CASCADE' });
+Colis.belongsTo(Client, { foreignKey: 'client_id' });
+
+Chauffeur.hasMany(Colis, { foreignKey: 'chauffeur_id', onDelete: 'SET NULL' });
+Colis.belongsTo(Chauffeur, { foreignKey: 'chauffeur_id' });
+
+Station.hasMany(Colis, { foreignKey: 'station_depart_id', as: 'ColisDepart', onDelete: 'CASCADE' });
+Station.hasMany(Colis, { foreignKey: 'station_arrivee_id', as: 'ColisArrivee', onDelete: 'CASCADE' });
+
+Colis.belongsTo(Station, { foreignKey: 'station_depart_id', as: 'StationDepart' });
+Colis.belongsTo(Station, { foreignKey: 'station_arrivee_id', as: 'StationArrivee' });
 
 
 

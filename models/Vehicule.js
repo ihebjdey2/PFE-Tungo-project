@@ -57,6 +57,10 @@ const Vehicule = sequelize.define('Vehicule', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  capacite_initiale: {
+  type: DataTypes.INTEGER,
+  allowNull: false,
+},
 }, {
   tableName: 'vehicules',
   timestamps: false, // Désactiver les colonnes createdAt et updatedAt

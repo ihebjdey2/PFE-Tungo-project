@@ -108,6 +108,96 @@ exports.createReservation = async (req, res) => {
 };
 
 
+exports.createPrivateReservation = async (req, res) => {
+    try {
+      const { ville_depart_id, ville_destination_id, date_reservation,heure_depart, heure_reservation } = req.body;
+      const client_id = req.user.id;
+  
+      // Vérifier que la date et l'heure de réservation sont au moins 3 jours après aujourd'hui
+      const now = new Date();
+      const reservationDateTime = new Date(`${date_reservation}T${heure_reservation}`);
+      const diffInDays = (reservationDateTime - now) / (1000 * 60 * 60 * 24);
+      if (diffInDays < 3) {
+        return res.status(400).json({ message: "La réservation doit être effectuée au moins 3 jours à l'avance." });
+      }
+  
+      // Vérifier l'existence des villes de départ et de destination
+      const villeDepart = await Ville.findByPk(ville_depart_id);
+      const villeDestination = await Ville.findByPk(ville_destination_id);
+      if (!villeDepart || !villeDestination) {
+        return res.status(400).json({ message: "Le point de départ ou la destination est invalide." });
+      }
+  
+      // Rechercher l'itinéraire correspondant
+      const itineraire = await Itineraire.findOne({
+        where: {
+          [Op.or]: [
+            { ville_pointA_id: ville_depart_id, ville_pointB_id: ville_destination_id },
+            { ville_pointA_id: ville_destination_id, ville_pointB_id: ville_depart_id }
+          ]
+        }
+      });
+      if (!itineraire) {
+        return res.status(404).json({ message: "Aucun itinéraire disponible pour ces villes." });
+      }
+  
+      // Récupérer la station de départ et d'arrivée
+      const stationDepart = await Station.findOne({
+        where: { villeId: ville_depart_id, destinations: { [Op.contains]: [ville_destination_id] } }
+      });
+      if (!stationDepart) {
+        return res.status(404).json({ message: "Aucune station de départ disponible pour cet itinéraire." });
+      }
+  
+      const stationArrivee = await Station.findOne({
+        where: { villeId: ville_destination_id, destinations: { [Op.contains]: [ville_depart_id] } }
+      });
+      if (!stationArrivee) {
+        return res.status(404).json({ message: "Aucune station d’arrivée disponible pour cet itinéraire." });
+      }
+  
+      // Optionnel : vérifier qu'il n'existe pas déjà une réservation privée similaire pour ce client
+      const existingReservation = await Reservation.findOne({
+        where: {
+          client_id,
+          statut: { [Op.in]: ['en_attente', 'confirmée'] },
+          type_reservation: 'vehicule',
+          date_reservation: date_reservation
+        }
+      });
+      if (existingReservation) {
+        return res.status(400).json({ message: "Vous avez déjà une réservation de véhicule pour ce jour." });
+      }
+  
+      // Calcul du prix total (ici on applique par exemple une majoration de 1.5 sur le tarif de base)
+      const prix = itineraire.tarif_base * 1.5;
+  
+      // Création de la réservation de type "vehicule" (trajet privé)
+      const reservation = await Reservation.create({
+        client_id,
+        chauffeur_id: null,       // Affectation ultérieure par le superviseur
+        vehicule_id: null,        // Affectation ultérieure par le superviseur
+        station_depart_id: stationDepart.id,
+        station_arrivee_id: stationArrivee.id,
+        itineraire_id: itineraire.id,
+        type_reservation: 'vehicule',
+        statut: 'en_attente',
+        heure_reservation: new Date(), // Conserve la date/heure actuelle d'enregistrement
+        date_reservation: date_reservation,
+        heure_depart,
+        prix,
+        nombre_places: null         // Non utilisé pour une réservation de véhicule entier
+      });
+  
+      res.status(201).json({ message: "Réservation de trajet privé créée avec succès.", reservation });
+  
+    } catch (error) {
+      console.error("Erreur lors de la création de la réservation de trajet privé :", error.message);
+      res.status(500).json({ message: "Erreur interne du serveur." });
+    }
+  };
+  
+
 
 exports.confirmReservation = async (req, res) => {
     try {

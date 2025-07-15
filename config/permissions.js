@@ -6,7 +6,18 @@ module.exports = {
     'view_station_destinations',
     'view_superviseur_destinations',
     'view_profile',
-    'view_villes'
+    'view_villes',
+    'list_superviseurs',
+    'list_clients',
+    'list_chauffeurs',
+    'add_itineraires',
+    'get_itineraires',
+    'update_itineraires',
+    'delete_itineraires',
+    'add_station',
+    'update_station',
+    'delete_station',
+    'list_station'
   ],
   Administrateur: [
     'create_superviseur',
@@ -14,7 +25,22 @@ module.exports = {
     'view_superviseur_destinations',
     'view_profile',
     'update_profile',
-    'view_villes'
+    'view_villes',
+    'list_superviseurs',
+    'list_clients',
+    'list_chauffeurs',
+    'add_itineraires',
+    'get_itineraires',
+    'update_itineraires',
+    'delete_itineraires',
+    'add_station',
+    'update_station',
+    'delete_station',
+    'list_station'
+
   ],
+  Superviseur: [
+    
+  ]
 
 };

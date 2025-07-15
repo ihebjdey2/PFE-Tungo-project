@@ -252,6 +252,72 @@ exports.getStationsPourTrajet = async (req, res) => {
 };
 
 
+// Initialiser la position du chauffeur
+// Initialiser les coordonnées GPS du chauffeur (latitude / longitude uniquement)
+exports.initPosition = async (req, res) => {
+  try {
+    const chauffeur_id = req.user.id;
+    const { latitude, longitude } = req.body;
+
+    if (latitude === undefined || longitude === undefined) {
+      return res.status(400).json({ message: 'Latitude et longitude sont obligatoires.' });
+    }
+
+    // Vérifier que le chauffeur a déjà une ligne active dans chauffeur_positions
+    const positionExistante = await ChauffeurPosition.findOne({ where: { chauffeur_id } });
+
+    if (!positionExistante) {
+      return res.status(404).json({ message: 'Aucune position trouvée. Sélectionnez d’abord un véhicule et un itinéraire.' });
+    }
+
+    // Mettre à jour uniquement la position GPS
+    positionExistante.latitude = latitude;
+    positionExistante.longitude = longitude;
+    positionExistante.derniere_mise_a_jour = new Date();
+    await positionExistante.save();
+
+    res.status(200).json({ message: 'Position GPS initialisée avec succès.' });
+
+  } catch (err) {
+    console.error('Erreur lors de l’initialisation GPS :', err.message);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+};
+
+
+
+exports.mettreAJourPosition = async (req, res) => {
+  try {
+    const chauffeur_id = req.user.id;
+    const { latitude, longitude } = req.body;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: 'Latitude et longitude sont obligatoires.' });
+    }
+
+    const positionExistante = await ChauffeurPosition.findOne({ where: { chauffeur_id } });
+
+    if (!positionExistante) {
+      return res.status(404).json({ error: 'Position non initialisée pour ce chauffeur.' });
+    }
+
+    // ✅ Modifier uniquement latitude/longitude
+    positionExistante.latitude = latitude;
+    positionExistante.longitude = longitude;
+    positionExistante.derniere_mise_a_jour = new Date();
+    await positionExistante.save();
+
+    res.status(200).json({ message: 'Position mise à jour avec succès.' });
+
+  } catch (error) {
+    console.error('Erreur mise à jour position chauffeur :', error);
+    res.status(500).json({ error: 'Erreur serveur lors de la mise à jour de la position.' });
+  }
+};
+
+
+
+
 
 
 

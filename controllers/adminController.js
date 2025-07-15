@@ -13,68 +13,68 @@ const Ville = require('../models/Ville');
 const permissions = require('../config/permissions');
 
 
-const loginAdmin = async (req, res) => {
-  const { email, password } = req.body;
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
+// const loginAdmin = async (req, res) => {
+//   const { email, password } = req.body;
+//   const adminEmail = process.env.ADMIN_EMAIL;
+//   const adminPassword = process.env.ADMIN_PASSWORD;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Veuillez fournir email et mot de passe' });
-  }
+//   if (!email || !password) {
+//     return res.status(400).json({ message: 'Veuillez fournir email et mot de passe' });
+//   }
 
-  // 🔹 Cas 1 : Admin principal (environnement)
-  if (email === adminEmail && password === adminPassword) {
-    const token = jwt.sign(
-      { id: 1, role: 'SuperAdmin' },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: '1h' }
-    );
+//   // 🔹 Cas 1 : Admin principal (environnement)
+//   if (email === adminEmail && password === adminPassword) {
+//     const token = jwt.sign(
+//       { id: 1, role: 'SuperAdmin' },
+//       process.env.JWT_SECRET_KEY,
+//       { expiresIn: '1h' }
+//     );
 
-    return res.status(200).json({
-      message: 'Connexion réussie (admin principal)',
-      token,
-      role: 'SuperAdmin',
-      permissions: permissions['SuperAdmin'],
-      isAdmin: true
-    });
+//     return res.status(200).json({
+//       message: 'Connexion réussie (admin principal)',
+//       token,
+//       role: 'SuperAdmin',
+//       permissions: permissions['SuperAdmin'],
+//       isAdmin: true
+//     });
     
-  }
+//   }
 
-  try {
-    // 🔹 Cas 2 : Autres administrateurs (BDD)
-    const utilisateur = await Utilisateur.findOne({
-      where: { email, role: 'Administrateur' }
-    });
+//   try {
+//     // 🔹 Cas 2 : Autres administrateurs (BDD)
+//     const utilisateur = await Utilisateur.findOne({
+//       where: { email, role: 'Administrateur' }
+//     });
 
-    if (!utilisateur) {
-      return res.status(400).json({ message: 'Identifiants incorrects.' });
-    }
+//     if (!utilisateur) {
+//       return res.status(400).json({ message: 'Identifiants incorrects.' });
+//     }
 
-    const isMatch = await bcrypt.compare(password, utilisateur.motDePasse);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Identifiants incorrects.' });
-    }
+//     const isMatch = await bcrypt.compare(password, utilisateur.motDePasse);
+//     if (!isMatch) {
+//       return res.status(400).json({ message: 'Identifiants incorrects.' });
+//     }
 
-    const token = jwt.sign(
-      { id: utilisateur.id, role: utilisateur.role },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: '1h' }
-    );
+//     const token = jwt.sign(
+//       { id: utilisateur.id, role: utilisateur.role },
+//       process.env.JWT_SECRET_KEY,
+//       { expiresIn: '1h' }
+//     );
 
-    return res.status(200).json({
-      message: 'Connexion réussie',
-      token,
-      role: utilisateur.role,
-      permissions: permissions[utilisateur.role],
-      utilisateur,
-      isAdmin: true
-    });
+//     return res.status(200).json({
+//       message: 'Connexion réussie',
+//       token,
+//       role: utilisateur.role,
+//       permissions: permissions[utilisateur.role],
+//       utilisateur,
+//       isAdmin: true
+//     });
     
-  } catch (err) {
-    console.error('Erreur lors de la connexion administrateur:', err.message);
-    res.status(500).json({ message: 'Erreur interne du serveur.' });
-  }
-};
+//   } catch (err) {
+//     console.error('Erreur lors de la connexion administrateur:', err.message);
+//     res.status(500).json({ message: 'Erreur interne du serveur.' });
+//   }
+// };
 const ajouterAdministrateur = async (req, res) => {
   const { id, role } = req.user;
   const { nom, prenom, email, motDePasse, numeroDeTelephone } = req.body;
@@ -401,7 +401,6 @@ const getAllVilles = async (req, res) => {
 
 
 module.exports = {
-  loginAdmin,
   ajouterAdministrateur,
   ajouterSuperviseur,
   getStations,

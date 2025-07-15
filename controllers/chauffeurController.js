@@ -95,7 +95,8 @@ exports.signup = async (req, res) => {
           modele: vehicule.modele,
           annee: vehicule.annee,
           numero_de_plaques: vehicule.numero_de_plaques,
-          capacite: vehicule.capacite || 4,
+          capacite: vehicule.capacite || 8,
+          capacite_initiale: vehicule.capacite || 8,
           statut: 'disponible',
           itineraire_id: itineraire.id,
         });
@@ -162,6 +163,7 @@ exports.getMe = async (req, res) => {
 };
 
 // Mise à jour de la disponibilité
+// Mise à jour de la disponibilité
 exports.updateDisponibilite = async (req, res) => {
   const { disponible } = req.body;
 
@@ -175,19 +177,33 @@ exports.updateDisponibilite = async (req, res) => {
     chauffeur.disponible = disponible;
     await chauffeur.save();
 
+    // Si indisponible, supprimer la position ET réinitialiser la capacité des véhicules
     if (!disponible) {
+      // 1. Supprimer les positions
       const deleted = await ChauffeurPosition.destroy({ where: { chauffeur_id: req.user.id } });
       console.log(`Toutes les entrées supprimées dans chauffeur_positions : ${deleted} ligne(s).`);
+
+      // 2. Réinitialiser tous les véhicules du chauffeur
+      const vehicules = await Vehicule.findAll({ where: { chauffeur_id: req.user.id } });
+
+      for (const vehicule of vehicules) {
+        await vehicule.update({
+          capacite: vehicule.capacite_initiale,
+          statut: 'disponible'
+        });
+      }
     }
 
     res.status(200).json({
       message: `Disponibilité mise à jour avec succès. Le chauffeur est maintenant ${disponible ? 'disponible' : 'indisponible'}.`,
     });
+
   } catch (err) {
     console.error("Erreur lors de la mise à jour de la disponibilité :", err.message);
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
+
 
 // Mise à jour du profil
 exports.updateProfile = async (req, res) => {

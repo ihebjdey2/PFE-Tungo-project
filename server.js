@@ -44,9 +44,12 @@ const clientRechercheRoutes = require('./routes/clientRechercheRoutes');
 const SuperviseurRoutes = require('./routes/routes_superviseur');
 const reservationRoutes = require('./routes/reservationRoutes');
 const superviseurChauffeurRoutes = require('./routes/superviseurChauffeurRoutes');
-const authAdminRoutes = require('./routes/auth_admin');
+const AdminRoutes = require('./routes/adminRoutes');
 const listUtilisateurRoutes = require('./routes/listUtilisateurRoutes');
-const stationItineraireRoutes = require('./routes/routes_station_itineraire');
+const authAdminSuperviseurRoutes = require ('./routes/auth_admin_superviseur')
+const stationItineraireRoutes = require ('./routes/routes_station_itineraire') 
+const resetPasswordRoutes = require ('./routes/reset_password') 
+const colisRoutes = require('./routes/colisRoutes');
 
 
 
@@ -58,11 +61,13 @@ app.use('/api/chauffeurs/sessions', chauffeurSessionRoutes);
 app.use('/api/clients/recherches', clientRechercheRoutes);
 app.use('/api/superviseur', SuperviseurRoutes);
 app.use('/api/reservations', reservationRoutes);
-app.use('/api/auth/admin', authAdminRoutes);
+app.use('/api/admin', AdminRoutes);
 app.use('/api/superviseur/chauffeurs', superviseurChauffeurRoutes);
 app.use('/api/admin/list', listUtilisateurRoutes);
 app.use('/api/admin/gestion', stationItineraireRoutes);
-
+app.use('/api/admin/superviseur/auth', authAdminSuperviseurRoutes )
+app.use('/api/utilisateur/auth', resetPasswordRoutes )
+app.use('/api/', colisRoutes);
 
 
 // Importer les modèles pour Sequelize
