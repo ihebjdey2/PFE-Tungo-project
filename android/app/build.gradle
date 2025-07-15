@@ -1,0 +1,59 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.example.reservation_louage_frontend" // Namespace correctement défini
+    compileSdk = 35 // Mise à jour du SDK pour compiler contre la version 34
+
+    defaultConfig {
+        applicationId = "com.example.reservation_louage_frontend"
+        minSdk = 21 // Assure la compatibilité minimale
+        targetSdk = 35 // Mise à jour du target SDK pour la version 34
+        versionCode flutter.versionCode.toInteger() // Convertir en entier si nécessaire
+        versionName flutter.versionName // Utilisation des versions Flutter
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        abortOnError false // Empêche les erreurs de lint d'arrêter la build
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    implementation "androidx.core:core-ktx:1.10.1"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.7.0" // Mise à jour de la version pour être compatible avec SDK 34
+    implementation "androidx.security:security-crypto:1.1.0-alpha04" // Utilisé pour flutter_secure_storage
+    implementation "androidx.appcompat:appcompat:1.6.1"
+}
+
+// Gestion des conflits de version
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.core:core-ktx:1.10.1'
+        force 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0' // Mise à jour de la version pour être compatible avec SDK 34
+    }
+}
