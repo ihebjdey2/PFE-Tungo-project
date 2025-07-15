@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/recherche_viewmodel.dart';
 import '../../viewmodels/auth_viewmodel.dart';
 import 'chauffeurs_disponibles_screen.dart';
+import 'reservation_vehicule.dart';
 
 class RechercheScreen extends StatefulWidget {
   @override
@@ -43,14 +44,7 @@ class _RechercheScreenState extends State<RechercheScreen> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (rechercheViewModel.errorMessage != null) {
-              return Center(
-                child: Text(
-                  rechercheViewModel.errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
-                ),
-              );
-            }
+            
 
             if (rechercheViewModel.villes.isEmpty) {
               return const Center(child: Text('Aucune ville disponible', style: TextStyle(fontSize: 16)));
@@ -86,6 +80,23 @@ class _RechercheScreenState extends State<RechercheScreen> {
                     icon: Icons.flag,  // 🏁 Ajout d'icône
                   ),
                   const SizedBox(height: 30),
+                  const SizedBox(height: 10),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/carte-test'); // 🔁 à adapter selon ton route
+                      },
+                      icon: const Icon(Icons.map),
+                      label: const Text("Choisir sur la carte"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.purple,
+                        side: const BorderSide(color: Colors.purple),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+
                   ElevatedButton(
                     onPressed: () async {
                     if (token == null) {
@@ -99,17 +110,12 @@ class _RechercheScreenState extends State<RechercheScreen> {
 
                     final success = await rechercheViewModel.createRecherche(token);
                     if (success) {
-                      _showSnackBar(context, 'Recherche mise à jour avec succès');
-
+                     
                       // 🔹 Charger les stations avant d'afficher les chauffeurs
                       await rechercheViewModel.fetchStationsPourTrajet(); 
 
-                      _navigateToChauffeursDisponiblesScreen(
-                        context,
-                        token,
-                        _pointDepart!['id'],
-                        _destination!['id'],
-                      );
+                      // Afficher le dialogue de sélection du type de réservation
+                      _showTypeReservationDialog(context, token, _pointDepart!['id'], _destination!['id']);
                     } else {
                       _showSnackBar(
                         context,
@@ -215,6 +221,150 @@ class _RechercheScreenState extends State<RechercheScreen> {
           pointDepartId: pointDepartId,
           destinationId: destinationId,
           token: token,
+        ),
+      ),
+    );
+  }
+
+  /// 🔹 Fonction pour afficher le dialogue de sélection du type de réservation
+  void _showTypeReservationDialog(BuildContext context, String token, int pointDepartId, int destinationId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        content: SingleChildScrollView(  // 🔁 Ajout ici
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Choisir le type de réservation',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.purple,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _buildTypeOption(
+                context,
+                'Réservation avec chauffeur',
+                'Choisir parmi les chauffeurs disponibles',
+                Icons.person,
+                () {
+                  Navigator.pop(context);
+                  _navigateToChauffeursDisponiblesScreen(context, token, pointDepartId, destinationId);
+                },
+              ),
+              const SizedBox(height: 16),
+              _buildTypeOption(
+                context,
+                'Réservation de véhicule',
+                'Réserver un véhicule pour votre trajet',
+                Icons.directions_car,
+                () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ReservationVehiculeScreen(
+                        pointDepartId: pointDepartId,
+                        destinationId: destinationId,
+                        token: token,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              _buildTypeOption(
+                context,
+                'Envoyer un colis',
+                'Faire livrer un colis à une autre ville',
+                Icons.local_shipping,
+                () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(
+                    context,
+                    '/envoyer-colis',
+                    arguments: {
+                      'station_depart_id': pointDepartId,
+                      'station_arrivee_id': destinationId,
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
+  /// 🔹 Widget pour construire une option de type de réservation
+  Widget _buildTypeOption(
+    BuildContext context,
+    String title,
+    String subtitle,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.purple.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: Colors.purple, size: 30),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.purple, size: 20),
+          ],
         ),
       ),
     );

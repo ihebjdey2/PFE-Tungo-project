@@ -1,103 +1,126 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_card.dart';
+import '../widgets/custom_scaffold.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({Key? key}) : super(key: key);
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Espace Client'),
-        centerTitle: true,
-        backgroundColor: Colors.purple,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView( // ✅ Permet le défilement si nécessaire
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildDashboardCard(
-                context,
-                icon: Icons.search,
-                color: Colors.blue,
-                title: 'Nouvelle Recherche',
-                subtitle: 'Trouvez des chauffeurs disponibles pour vos trajets.',
-                routeName: '/recherche',
-              ),
-              const SizedBox(height: 16),
-              _buildDashboardCard(
-                context,
-                icon: Icons.person,
-                color: Colors.green,
-                title: 'Voir Profil',
-                subtitle: 'Consultez et mettez à jour vos informations personnelles.',
-                routeName: '/profile',
-              ),
-              const SizedBox(height: 16),
-              _buildDashboardCard(
-                context,
-                icon: Icons.history,
-                color: Colors.orange,
-                title: 'Historique des Réservations',
-                subtitle: 'Consultez vos trajets passés.',
-                routeName: '/historique',
-              ),
-              const SizedBox(height: 16),
-              _buildDashboardCard(
-                context,
-                icon: Icons.timer,
-                color: const Color.fromARGB(255, 39, 176, 69),
-                title: 'Ma Réservation Actuelle',
-                subtitle: 'Voir le statut et les détails de votre réservation en cours.',
-                routeName: '/reservation-actuelle',
-              ),
-              const SizedBox(height: 16),
-              _buildDashboardCard(
-                context,
-                icon: Icons.map,
-                color: Colors.red,
-                title: 'Afficher la Carte',
-                subtitle: 'Voir les trajets et les stations sur la carte.',
-                routeName: '/map',
-              ),
-            ],
-          ),
-        ),
+    return CustomScaffold(
+      title: 'Espace Client',
+      currentIndex: _selectedIndex,
+      onTabChanged: _onItemTapped,
+      showDrawer: false,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: _buildDashboardContent(),
       ),
     );
   }
 
-  Widget _buildDashboardCard(
-    BuildContext context, {
+  Widget _buildDashboardContent() {
+    switch (_selectedIndex) {
+      case 0:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildDashboardCard(
+              icon: Icons.search,
+              color: Colors.blue,
+              title: 'Nouvelle Recherche',
+              subtitle: 'Trouvez un trajet ou réservez un véhicule.',
+              routeName: '/recherche',
+            ),
+            
+            _buildDashboardCard(
+              icon: Icons.search,
+              color: Colors.teal,
+              title: 'Suivre un Colis',
+              subtitle: 'Suivez votre colis en cours de livraison.',
+              routeName: '/suivrecolis',
+            ),
+            _buildDashboardCard(
+              icon: Icons.search,
+              color: Colors.teal,
+              title: 'voir mes Colis',
+              subtitle: 'Suivez votre colis en cours de livraison.',
+              routeName: '/colis',
+            ),
+          ],
+        );
+      case 1:
+        return _buildDashboardCard(
+          icon: Icons.timer,
+          color: Colors.green,
+          title: 'Réservation Actuelle',
+          subtitle: 'Consultez votre réservation en cours.',
+          routeName: '/reservation-actuelle',
+        );
+      case 2:
+        return _buildDashboardCard(
+          icon: Icons.history,
+          color: Colors.orange,
+          title: 'Historique',
+          subtitle: 'Consultez vos anciennes réservations.',
+          routeName: '/historique',
+        );
+      case 3:
+        return _buildDashboardCard(
+          icon: Icons.person,
+          color: Colors.indigo,
+          title: 'Profil',
+          subtitle: 'Gérez vos informations personnelles.',
+          routeName: '/profile',
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildDashboardCard({
     required IconData icon,
     required Color color,
     required String title,
     required String subtitle,
     required String routeName,
   }) {
-    return Card(
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16.0),
-        leading: CircleAvatar(
-          radius: 24,
-          backgroundColor: color.withOpacity(0.1),
-          child: Icon(icon, color: color, size: 28),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16.0,
+    return CustomCard(
+      margin: const EdgeInsets.only(bottom: 20),
+      onTap: () => Navigator.pushNamed(context, routeName),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: color.withOpacity(0.1),
+            child: Icon(icon, color: color, size: 28),
           ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(fontSize: 14.0),
-        ),
-        onTap: () => Navigator.pushNamed(context, routeName),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                const SizedBox(height: 6),
+                Text(subtitle, style: const TextStyle(fontSize: 14, color: Colors.black54)),
+              ],
+            ),
+          ),
+          const Icon(Icons.arrow_forward_ios, size: 20, color: Colors.black38),
+        ],
       ),
     );
   }

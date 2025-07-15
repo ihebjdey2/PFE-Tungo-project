@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.example.reservation_louage_frontend" // Namespace correctement défini
-    compileSdk = 34 // Mise à jour du SDK pour compiler contre la version 34
+    compileSdk = 35 // Mise à jour du SDK pour compiler contre la version 34
 
     defaultConfig {
         applicationId = "com.example.reservation_louage_frontend"
         minSdk = 21 // Assure la compatibilité minimale
-        targetSdk = 34 // Mise à jour du target SDK pour la version 34
+        targetSdk = 35 // Mise à jour du target SDK pour la version 34
         versionCode flutter.versionCode.toInteger() // Convertir en entier si nécessaire
         versionName flutter.versionName // Utilisation des versions Flutter
     }

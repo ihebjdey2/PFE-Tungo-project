@@ -135,5 +135,56 @@ Future<List<Map<String, dynamic>>?> getReservationHistory(String token) async {
   }
 }
 
+  // 🔹 Créer une réservation de véhicule
+  Future<Map<String, dynamic>?> createVehiculeReservation({
+    required String token,
+    required int villeDepartId,
+    required int villeDestinationId,
+    required String dateReservation,
+    required String heureDepart,
+  }) async {
+    final url = Uri.parse('$baseUrl/reservations/Client/create/vehicule');
+    
+    final requestBody = jsonEncode({
+      "ville_depart_id": villeDepartId,
+      "ville_destination_id": villeDestinationId,
+      "date_reservation": dateReservation,
+      "heure_depart": heureDepart,
+    });
+
+    logger.i("📤 Envoi de la requête de réservation de véhicule : $requestBody");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: requestBody,
+      );
+
+      logger.i("📡 Code HTTP : ${response.statusCode}");
+      logger.i("📡 Réponse brute : ${response.body}");
+
+      if (response.statusCode == 201) {
+        final jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['reservation'] != null) {
+          logger.i("✅ Réservation créée avec succès : ${jsonResponse['reservation']}");
+          return jsonResponse['reservation'];
+        } else {
+          logger.e("❌ Réponse invalide : pas de données de réservation");
+          throw Exception("Réponse invalide du serveur");
+        }
+      } else {
+        final errorMessage = jsonDecode(response.body)['message'] ?? "Erreur inconnue";
+        logger.e("❌ Erreur API : $errorMessage");
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      logger.e("⛔ Erreur lors de la création de la réservation de véhicule : $e");
+      return null;
+    }
+  }
 
 }
