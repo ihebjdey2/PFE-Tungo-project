@@ -107,7 +107,7 @@ class ChauffeursDisponiblesScreenState extends State<ChauffeursDisponiblesScreen
       ),
       body: Column(
         children: [
-          // 🔹 Affichage des stations de départ et d’arrivée
+          // 🔹 Affichage des stations de départ et d'arrivée
           if (rechercheViewModel.stationDepart != null && rechercheViewModel.stationArrivee != null)
             Padding(
               padding: const EdgeInsets.all(10.0),
@@ -121,7 +121,7 @@ class ChauffeursDisponiblesScreenState extends State<ChauffeursDisponiblesScreen
                     children: [
                       _buildStationInfo("Station de Départ", rechercheViewModel.stationDepart!),
                       const SizedBox(height: 10),
-                      _buildStationInfo("Station d’Arrivée", rechercheViewModel.stationArrivee!),
+                      _buildStationInfo("Station d'Arrivée", rechercheViewModel.stationArrivee!),
                     ],
                   ),
                 ),

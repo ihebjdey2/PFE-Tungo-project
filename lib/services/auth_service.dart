@@ -85,5 +85,70 @@ class AuthService {
       throw Exception('Erreur réseau ou interne. Veuillez réessayer.');
     }
   }
+
+  
+  // Demande de réinitialisation (correction de l'URL)
+Future<Map<String, dynamic>> forgotPassword(String email) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/utilisateur/auth/request-reset'), // URL corrigée
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'email': email}),
+    );
+
+    final responseData = json.decode(response.body);
+
+    return {
+      'success': response.statusCode == 200,
+      'message': responseData['message'] ?? 'Erreur inconnue',
+      'data': responseData,
+    };
+  } catch (e) {
+    logger.e('Erreur API forgotPassword: $e');
+    return {
+      'success': false,
+      'message': 'Erreur de connexion au serveur',
+      'data': null,
+    };
+  }
+}
+
+// Réinitialisation du mot de passe (correction de l'URL)
+Future<Map<String, dynamic>> resetPassword({
+  required String token,
+  required String newPassword,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/utilisateur/auth/reset-password'), // URL corrigée
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({
+        'token': token,
+        'newPassword': newPassword,
+      }),
+    );
+
+    final responseData = json.decode(response.body);
+
+    return {
+      'success': response.statusCode == 200,
+      'message': responseData['message'] ?? 'Erreur inconnue',
+      'data': responseData,
+    };
+  } catch (e) {
+    logger.e('Erreur API resetPassword: $e');
+    return {
+      'success': false,
+      'message': 'Erreur de connexion au serveur',
+      'data': null,
+    };
+  }
+}
 }
 

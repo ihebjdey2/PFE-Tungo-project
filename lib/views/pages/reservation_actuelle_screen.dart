@@ -73,11 +73,11 @@ class ReservationActuelleScreenState extends State<ReservationActuelleScreen> {
 Widget _buildReservationDetails(Map<String, dynamic> reservation) {
   String statut = reservation['statut'];
   int stepIndex = _getStepIndex(statut);
+  String type = reservation['type_reservation'] ?? 'place';
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      // Carte stylisée pour la réservation
       Card(
         elevation: 10,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -87,40 +87,87 @@ Widget _buildReservationDetails(Map<String, dynamic> reservation) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildInfoRow(Icons.person, "Chauffeur", "${reservation['Chauffeur']['Utilisateur']['nom']} ${reservation['Chauffeur']['Utilisateur']['prenom']}"),
-              _buildInfoRow(Icons.directions_car, "Véhicule", "${reservation['Vehicule']['marque']} ${reservation['Vehicule']['modele']} (${reservation['Vehicule']['numero_de_plaques']})"),
-              _buildInfoRow(Icons.location_on, "Départ", "${reservation['StationDepart']['nom']} (${reservation['StationDepart']['adresse']})"),
-              _buildInfoRow(Icons.flag, "Arrivée", "${reservation['StationArrivee']['nom']} (${reservation['StationArrivee']['adresse']})"),
-              _buildInfoRow(Icons.chair, "Nombre de places", "${reservation['nombre_places']}"),
-              _buildInfoRow(Icons.attach_money, "Prix", "${reservation['prix']} TND"),
+
+              // ✅ Affiche chauffeur/voiture pour tout type si disponibles
+              if (reservation['Chauffeur'] != null)
+                _buildInfoRow(
+                  Icons.person,
+                  "Chauffeur",
+                  "${reservation['Chauffeur']['Utilisateur']['nom']} ${reservation['Chauffeur']['Utilisateur']['prenom']}",
+                ),
+
+              if (reservation['Vehicule'] != null)
+                _buildInfoRow(
+                  Icons.directions_car,
+                  "Véhicule",
+                  "${reservation['Vehicule']['marque']} ${reservation['Vehicule']['modele']} (${reservation['Vehicule']['numero_de_plaques']})",
+                ),
+
+              // ✅ Si type = place → afficher nombre de places
+              if (type == 'place' && reservation['nombre_places'] != null)
+                _buildInfoRow(
+                  Icons.chair,
+                  "Nombre de places",
+                  "${reservation['nombre_places']}",
+                ),
+
+              // ✅ Si type = vehicule → afficher date/heure
+              if (type == 'vehicule' && reservation['date_reservation'] != null)
+                _buildInfoRow(
+                  Icons.calendar_today,
+                  "Date de départ",
+                  DateFormat('dd/MM/yyyy').format(DateTime.parse(reservation['date_reservation'])),
+                ),
+              if (type == 'vehicule' && reservation['heure_depart'] != null)
+                _buildInfoRow(
+                  Icons.access_time,
+                  "Heure de départ",
+                  reservation['heure_depart'],
+                ),
+
+              if (reservation['StationDepart'] != null)
+                _buildInfoRow(
+                  Icons.location_on,
+                  "Départ",
+                  "${reservation['StationDepart']['nom']} (${reservation['StationDepart']['adresse']})",
+                ),
+
+              if (reservation['StationArrivee'] != null)
+                _buildInfoRow(
+                  Icons.flag,
+                  "Arrivée",
+                  "${reservation['StationArrivee']['nom']} (${reservation['StationArrivee']['adresse']})",
+                ),
+
+              _buildInfoRow(
+                Icons.attach_money,
+                "Prix",
+                "${reservation['prix']} TND",
+              ),
             ],
           ),
         ),
       ),
 
       const SizedBox(height: 20),
-      // Barre de progression animée
       AnimatedProgressBar(stepIndex: stepIndex),
-
       const SizedBox(height: 20),
 
-      // Afficher le bouton uniquement si le statut est "en_attente" ou "confirmée"
       if (statut == 'en_attente' || statut == 'confirmée')
         ElevatedButton(
           onPressed: () async {
             final reservationViewModel = Provider.of<ReservationViewModel>(context, listen: false);
-
             bool success = await reservationViewModel.cancelCurrentReservation();
 
-            if (success) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Réservation annulée avec succès.")),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(reservationViewModel.errorMessage ?? "Erreur inconnue")),
-              );
-            }
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  success
+                      ? "Réservation annulée avec succès."
+                      : reservationViewModel.errorMessage ?? "Erreur inconnue",
+                ),
+              ),
+            );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red,
@@ -131,6 +178,7 @@ Widget _buildReservationDetails(Map<String, dynamic> reservation) {
     ],
   );
 }
+
 
   int _getStepIndex(String statut) {
     switch (statut) {

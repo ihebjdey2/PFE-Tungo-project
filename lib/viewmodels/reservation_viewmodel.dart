@@ -83,16 +83,18 @@ class ReservationViewModel extends ChangeNotifier {
       return;
     }
 
-    print("📢 Token utilisé pour la réservation : $token");
+    _logger.i("📢 Token utilisé pour la réservation : $token");
 
     final reservation = await _reservationService.getCurrentReservation(token);
     if (reservation != null) {
        _logger.i("✅ Réservation récupérée : $reservation"); // Log des données complètes
-      _logger.d("📊 Statut de la réservation : ${reservation['statut']}");
+      if (reservation['statut'] != null) {
+        _logger.d("📊 Statut de la réservation : ${reservation['statut']}");
+      }
       _currentReservation = reservation;
       notifyListeners();
     } else {
-      print("❌ Aucune réservation trouvée.");
+      _logger.w("❌ Aucune réservation trouvée.");
       _setError("Aucune réservation en cours.");
     }
   } catch (e) {
@@ -165,5 +167,52 @@ Future<void> fetchReservationHistory() async {
     _setLoading(false);
   }
 }
+
+  // 🔹 Créer une réservation de véhicule
+  Future<bool> createVehiculeReservation({
+    required String token,
+    required int villeDepartId,
+    required int villeDestinationId,
+    required DateTime dateReservation,
+    required TimeOfDay heureDepart,
+  }) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      // Formater la date au format YYYY-MM-DD
+      final formattedDate = "${dateReservation.year}-${dateReservation.month.toString().padLeft(2, '0')}-${dateReservation.day.toString().padLeft(2, '0')}";
+      
+      // Formater l'heure au format HH:mm:ss
+      final formattedTime = "${heureDepart.hour.toString().padLeft(2, '0')}:${heureDepart.minute.toString().padLeft(2, '0')}:00";
+
+      _logger.i("📅 Date formatée : $formattedDate");
+      _logger.i("⏰ Heure formatée : $formattedTime");
+
+      final reservation = await _reservationService.createVehiculeReservation(
+        token: token,
+        villeDepartId: villeDepartId,
+        villeDestinationId: villeDestinationId,
+        dateReservation: formattedDate,
+        heureDepart: formattedTime,
+      );
+
+      if (reservation != null) {
+        _logger.i("✅ Réservation de véhicule créée avec succès: $reservation");
+        _currentReservation = reservation;
+        notifyListeners();
+        return true;
+      } else {
+        _setError("Échec de la réservation de véhicule. Veuillez réessayer.");
+        return false;
+      }
+    } catch (e) {
+      _logger.e("⛔ Erreur lors de la réservation de véhicule : $e");
+      _setError(e.toString());
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
 
 }
