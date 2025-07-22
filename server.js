@@ -102,8 +102,32 @@ sequelize.sync({ alter: true }) // Utilisez alter: true pour ajuster la base de 
   .then(() => console.log('✅ Base de données synchronisée avec succès.'))
   .catch((err) => console.error('❌ Erreur lors de la synchronisation de la base de données :', err));
 
-// Démarrer le serveur
-const PORT = process.env.PORT || 3000; // Port défini dans .env ou 3000 par défaut
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+
+
+
+
+
+
+
+
+const http = require('http');               // 👈 Créer un serveur HTTP
+const { Server } = require('socket.io');    // 👈 Importer socket.io
+
+const server = http.createServer(app);      // 👈 Wrap express dans HTTP
+
+const io = new Server(server, {
+  cors: {
+    origin: '*', // ⚠️ mettre domaine exact en prod
+    methods: ['GET', 'POST']
+  }
 });
+
+// 👇 DÉPLACE LA LIGNE ICI SEULEMENT
+require('./config/socketHandler')(io);
+
+// ✅ Lancer le serveur complet
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`🚀 Serveur + WebSocket démarré sur le port ${PORT}`);
+});
+

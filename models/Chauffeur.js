@@ -40,6 +40,17 @@ const Chauffeur = sequelize.define('Chauffeur', {
       },
     },
   },
+  languePreference: {
+    type: DataTypes.ENUM('ar', 'fr', 'en'),
+    allowNull: false,
+    defaultValue: 'fr',
+    validate: {
+      isIn: {
+        args: [['ar', 'fr', 'en']],
+        msg: "La langue préférée doit être 'ar', 'fr' ou 'en'."
+      }
+    }
+  },
   
   
   disponible: {

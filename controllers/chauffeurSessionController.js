@@ -235,13 +235,17 @@ exports.getStationsPourTrajet = async (req, res) => {
               id: stationDepart.id,
               nom: stationDepart.nom,
               adresse: stationDepart.adresse,
-              telephone: stationDepart.telephone
+              telephone: stationDepart.telephone,
+              latitude: stationDepart.latitude,     // ✅ ajouté
+              longitude: stationDepart.longitude
           },
           station_arrivee: {
               id: stationArrivee.id,
               nom: stationArrivee.nom,
               adresse: stationArrivee.adresse,
-              telephone: stationArrivee.telephone
+              telephone: stationArrivee.telephone,
+              latitude: stationArrivee.latitude,     // ✅ ajouté
+              longitude: stationArrivee.longitude 
           }
       });
 
