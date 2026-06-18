@@ -15,33 +15,7 @@ const Chauffeur = require('../models/Chauffeur');
 const ChauffeurPosition = require('../models/ChauffeurPosition');
 const { Op } = require('sequelize');
 
-// exports.signin = async (req, res) => {
-//   const { email, motDePasse } = req.body;
 
-//   try {
-//     if (!email || !motDePasse) {
-//       console.log("❌ Champs manquants :", { email, motDePasse });
-//       return res.status(400).json({ message: 'Email et mot de passe sont requis.' });
-//     }
-
-//     const utilisateur = await Utilisateur.findOne({ where: { email, role: 'Superviseur' } });
-//     if (!utilisateur) return res.status(400).json({ message: 'Identifiants incorrects.' });
-
-//     const isMatch = await bcrypt.compare(motDePasse, utilisateur.motDePasse);
-//     if (!isMatch) return res.status(400).json({ message: 'Identifiants incorrects.' });
-
-//     const token = jwt.sign(
-//       { id: utilisateur.id, role: utilisateur.role },
-//       process.env.JWT_SECRET_KEY,
-//       { expiresIn: '1h' }
-//     );
-
-//     res.status(200).json({ message: 'Connexion réussie.', token, utilisateur });
-//   } catch (err) {
-//     console.error('Erreur lors de la connexion:', err.message);
-//     res.status(500).json({ message: 'Erreur interne du serveur.' });
-//   }
-// };
 //RECUPERER LA LISTE DES CHAUFFEURS POUR CHAQUE DESTINATION
 exports.getChauffeursForSuperviseurDestinations = async (req, res) => {
   const { superviseurId } = req.params;
@@ -390,5 +364,39 @@ exports.assignChauffeurToVehiculeReservation = async (req, res) => {
   }
 };
 
+exports.getStationForSuperviseur = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const superviseur = await Superviseur.findByPk(id, {
+      include: {
+        model: Station,
+        include: [{ model: Ville, attributes: ['id', 'nom'] }]
+      }
+    });
+
+    if (!superviseur) {
+      return res.status(404).json({ message: "Superviseur introuvable" });
+    }
+
+    const station = superviseur.Station;
+    if (!station) {
+      return res.status(404).json({ message: "Aucune station associée à ce superviseur" });
+    }
+
+    res.json({
+      station: {
+        id: station.id,
+        nom: station.nom,
+        villeId: station.Ville ? station.Ville.id : null,   // 🔥 ajout de l’ID
+        villeNom: station.Ville ? station.Ville.nom : null, 
+        type_station: station.type_station
+      }
+    });
+  } catch (err) {
+    console.error("Erreur getStationForSuperviseur:", err.message);
+    res.status(500).json({ message: "Erreur interne du serveur" });
+  }
+};
 
 

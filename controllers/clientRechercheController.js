@@ -78,7 +78,6 @@ exports.getChauffeursDisponibles = async (req, res) => {
   const { point_depart_id, destination_id, limit = 10, offset = 0 } = req.query;
 
   try {
-    // Vérification de l'existence des villes via les IDs
     const depart = await Ville.findByPk(point_depart_id);
     const destination = await Ville.findByPk(destination_id);
 
@@ -90,15 +89,14 @@ exports.getChauffeursDisponibles = async (req, res) => {
       return res.status(400).json({ message: 'Le point de départ et la destination doivent être différents.' });
     }
 
-    // Recherche des chauffeurs disponibles triés par priorité
     const chauffeurs = await ChauffeurPosition.findAll({
-      where: { point_depart: point_depart_id, destination: destination_id ,priorite: 1},
+      where: { point_depart: point_depart_id, destination: destination_id, priorite: 1 },
       include: [
         {
           model: Chauffeur,
-          include: [{ model: Utilisateur, attributes: ['nom', 'prenom'] }],
+          include: [{ model: Utilisateur, attributes: ['nom', 'prenom', 'image'] }],
         },
-        { model: Vehicule, as: 'Vehicule', attributes: ['marque', 'modele', 'numero_de_plaques','capacite'] },
+        { model: Vehicule, as: 'Vehicule', attributes: ['marque', 'modele', 'numero_de_plaques', 'capacite'] },
       ],
       limit: parseInt(limit, 10),
       offset: parseInt(offset, 10),
@@ -108,21 +106,29 @@ exports.getChauffeursDisponibles = async (req, res) => {
       return res.status(404).json({ message: 'Aucun chauffeur disponible pour cet itinéraire.' });
     }
 
-    // Formatage de la réponse
-    const resultat = chauffeurs.map((position) => ({
-      chauffeur_id: position.chauffeur_id,
-      nom: position.Chauffeur.Utilisateur.nom,
-      prenom: position.Chauffeur.Utilisateur.prenom,
-      ville_depart: depart.nom,
-      ville_destination: destination.nom,
-      vehicule: {
-        marque: position.Vehicule.marque,
-        modele: position.Vehicule.modele,
-        numero_de_plaques: position.Vehicule.numero_de_plaques,
-        capacite: position.Vehicule.capacite,
-      },
-      priorite: position.priorite
-    }));
+    const host = req.get('host');       // ex: localhost:3000
+    const protocol = req.protocol;      // http ou https
+
+    const resultat = chauffeurs.map((position) => {
+      const filename = position.Chauffeur.Utilisateur.image;
+      const imageUrl = filename ? `${protocol}://${host}/uploads/${filename}` : null;
+
+      return {
+        chauffeur_id: position.chauffeur_id,
+        nom: position.Chauffeur.Utilisateur.nom,
+        prenom: position.Chauffeur.Utilisateur.prenom,
+        image: imageUrl,
+        ville_depart: depart.nom,
+        ville_destination: destination.nom,
+        vehicule: {
+          marque: position.Vehicule.marque,
+          modele: position.Vehicule.modele,
+          numero_de_plaques: position.Vehicule.numero_de_plaques,
+          capacite: position.Vehicule.capacite,
+        },
+        priorite: position.priorite,
+      };
+    });
 
     res.status(200).json({
       total: chauffeurs.length,
@@ -134,6 +140,7 @@ exports.getChauffeursDisponibles = async (req, res) => {
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
+
 
 exports.cancelRecherche = async (req, res) => {
   const client_id = req.user.id;

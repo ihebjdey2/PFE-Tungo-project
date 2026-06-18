@@ -41,6 +41,7 @@ const authClientRoutes = require('./routes/auth_client');
 const chauffeurProfileRoutes = require('./routes/chauffeurProfileRoutes');
 const chauffeurSessionRoutes = require('./routes/chauffeurSessionRoutes');
 const clientRechercheRoutes = require('./routes/clientRechercheRoutes');
+const clientRechercheTransport = require('./routes/clientRechercheTransport');
 const SuperviseurRoutes = require('./routes/routes_superviseur');
 const reservationRoutes = require('./routes/reservationRoutes');
 const superviseurChauffeurRoutes = require('./routes/superviseurChauffeurRoutes');
@@ -50,6 +51,11 @@ const authAdminSuperviseurRoutes = require ('./routes/auth_admin_superviseur')
 const stationItineraireRoutes = require ('./routes/routes_station_itineraire') 
 const resetPasswordRoutes = require ('./routes/reset_password') 
 const colisRoutes = require('./routes/colisRoutes');
+const villeRoutes = require('./routes/villeRoutes');
+const CompagnieRoutes = require('./routes/routes_compagnie');
+const horaireRoutes = require('./routes/horaireRoutes');
+const reservationTransportRoutes = require('./routes/reservationTransportRoutes');
+const chatRoutes = require('./routes/chat');
 
 
 
@@ -59,8 +65,10 @@ app.use('/api/clients/auth', authClientRoutes);
 app.use('/api/chauffeurs', chauffeurProfileRoutes);
 app.use('/api/chauffeurs/sessions', chauffeurSessionRoutes);
 app.use('/api/clients/recherches', clientRechercheRoutes);
+app.use('/api/clients/transport/recherches', clientRechercheTransport);
 app.use('/api/superviseur', SuperviseurRoutes);
 app.use('/api/reservations', reservationRoutes);
+app.use('/api/reservationTransport', reservationTransportRoutes);
 app.use('/api/admin', AdminRoutes);
 app.use('/api/superviseur/chauffeurs', superviseurChauffeurRoutes);
 app.use('/api/admin/list', listUtilisateurRoutes);
@@ -68,6 +76,10 @@ app.use('/api/admin/gestion', stationItineraireRoutes);
 app.use('/api/admin/superviseur/auth', authAdminSuperviseurRoutes )
 app.use('/api/utilisateur/auth', resetPasswordRoutes )
 app.use('/api/', colisRoutes);
+app.use('/api/villes', villeRoutes);
+app.use('/api/compagnie', CompagnieRoutes);
+app.use('/api/horaires', horaireRoutes);
+app.use('/api/chat', chatRoutes);
 
 
 // Importer les modèles pour Sequelize
@@ -82,6 +94,12 @@ require('./models/Vehicule');
 require('./models/Itineraire');
 require('./models/Ville');
 require('./models/Reservation');
+require('./models/Compagnie');
+require('./models/ItineraireBus');
+require('./models/ItineraireTrain');
+require('./models/HoraireTransport');
+require('./models/ArretTransport');
+
 
 // Configurer les relations entre les modèles
 setupRelations();

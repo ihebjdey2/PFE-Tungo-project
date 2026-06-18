@@ -9,72 +9,12 @@ const Administrateur = require('../models/Administrateur');
 const Superviseur = require('../models/Superviseur');
 const Station = require('../models/Station');
 const Ville = require('../models/Ville');
+const Compagnie = require('../models/Compagnie');
 
 const permissions = require('../config/permissions');
 
 
-// const loginAdmin = async (req, res) => {
-//   const { email, password } = req.body;
-//   const adminEmail = process.env.ADMIN_EMAIL;
-//   const adminPassword = process.env.ADMIN_PASSWORD;
 
-//   if (!email || !password) {
-//     return res.status(400).json({ message: 'Veuillez fournir email et mot de passe' });
-//   }
-
-//   // 🔹 Cas 1 : Admin principal (environnement)
-//   if (email === adminEmail && password === adminPassword) {
-//     const token = jwt.sign(
-//       { id: 1, role: 'SuperAdmin' },
-//       process.env.JWT_SECRET_KEY,
-//       { expiresIn: '1h' }
-//     );
-
-//     return res.status(200).json({
-//       message: 'Connexion réussie (admin principal)',
-//       token,
-//       role: 'SuperAdmin',
-//       permissions: permissions['SuperAdmin'],
-//       isAdmin: true
-//     });
-    
-//   }
-
-//   try {
-//     // 🔹 Cas 2 : Autres administrateurs (BDD)
-//     const utilisateur = await Utilisateur.findOne({
-//       where: { email, role: 'Administrateur' }
-//     });
-
-//     if (!utilisateur) {
-//       return res.status(400).json({ message: 'Identifiants incorrects.' });
-//     }
-
-//     const isMatch = await bcrypt.compare(password, utilisateur.motDePasse);
-//     if (!isMatch) {
-//       return res.status(400).json({ message: 'Identifiants incorrects.' });
-//     }
-
-//     const token = jwt.sign(
-//       { id: utilisateur.id, role: utilisateur.role },
-//       process.env.JWT_SECRET_KEY,
-//       { expiresIn: '1h' }
-//     );
-
-//     return res.status(200).json({
-//       message: 'Connexion réussie',
-//       token,
-//       role: utilisateur.role,
-//       permissions: permissions[utilisateur.role],
-//       utilisateur,
-//       isAdmin: true
-//     });
-    
-//   } catch (err) {
-//     console.error('Erreur lors de la connexion administrateur:', err.message);
-//     res.status(500).json({ message: 'Erreur interne du serveur.' });
-//   }
-// };
 const ajouterAdministrateur = async (req, res) => {
   const { id, role } = req.user;
   const { nom, prenom, email, motDePasse, numeroDeTelephone } = req.body;
@@ -216,12 +156,20 @@ const ajouterSuperviseur = async (req, res) => {
 };
 
 
-// 🔹 Récupérer toutes les stations
+// 🔹 Récupérer toutes les stations (avec compagnies)
 const getStations = async (req, res) => {
   try {
     const stations = await Station.findAll({
-      include: [{ model: Ville, attributes: ['id', 'nom'] }],
-      attributes: ['id', 'nom', 'villeId', 'destinations']
+      include: [
+        { model: Ville, attributes: ['id', 'nom'] },
+        {
+          model: Compagnie,
+          as: 'Compagnies',
+          attributes: ['id', 'nom', 'type', 'telephone', 'email'], // tu peux réduire si besoin
+          through: { attributes: [] } // pour ne pas renvoyer la table pivot
+        }
+      ],
+      attributes: ['id', 'nom', 'villeId', 'destinations', 'type_station', 'adresse', 'telephone']
     });
 
     res.status(200).json({
@@ -229,9 +177,19 @@ const getStations = async (req, res) => {
       stations: stations.map(station => ({
         id: station.id,
         nom: station.nom,
+        type_station: station.type_station,
         villeId: station.villeId,
         villeNom: station.Ville?.nom,
-        destinations: station.destinations
+        adresse: station.adresse,
+        telephone: station.telephone,
+        destinations: station.destinations,
+        compagnies: station.Compagnies?.map(c => ({
+          id: c.id,
+          nom: c.nom,
+          type: c.type,
+          telephone: c.telephone,
+          email: c.email
+        })) || []
       }))
     });
   } catch (error) {
@@ -239,6 +197,7 @@ const getStations = async (req, res) => {
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
+
 const getDestinationsForStation = async (req, res) => {
   const { stationId } = req.params;
 

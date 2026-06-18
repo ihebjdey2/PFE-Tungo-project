@@ -17,7 +17,21 @@ module.exports = {
     'add_station',
     'update_station',
     'delete_station',
-    'list_station'
+    'list_station',
+    'delete_ville',
+    'update_ville',
+    'get_ville',
+    'add_ville',
+    'add_compagnie',
+    'list_compagnie',
+    'update_compagnie',
+    'delete_compagnie',
+    'associer_compagnie_station',
+    'retirer_compagnie_station'
+
+
+
+
   ],
   Administrateur: [
     'create_superviseur',
@@ -41,6 +55,9 @@ module.exports = {
   ],
   Superviseur: [
     
+        'view_stations',
+        'view_superviseur_destinations'
+
   ]
 
 };

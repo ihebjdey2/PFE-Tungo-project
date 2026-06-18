@@ -15,7 +15,9 @@ router.get('/superviseur/:superviseurId/reservations/vehicule', authenticateToke
 router.post('/superviseur/reservation/assign', authenticateToken, verifyRole('Superviseur'), superviseurController.assignChauffeurToVehiculeReservation);
 
 router.get('/superviseur/:chauffeur_id/reservation/:reservation_id/vehicules-compatibles',authenticateToken, verifyRole('Superviseur'),superviseurController. getCompatibleVehiculesForChauffeurReservation);
-  
+
+router.get('/:id/station', superviseurController.getStationForSuperviseur);
+
 /*
 router.post('/itineraire',authenticateToken, verifyRole('superviseur'), superviseurController.ajouterItineraire);
 router.get('/itineraire',authenticateToken, verifyRole('superviseur'), superviseurController.getItineraires);

@@ -26,6 +26,13 @@ const Station = sequelize.define('Station', {
         allowNull: false, 
         defaultValue: []
     },
+    type_station: {
+  type: DataTypes.ENUM('louage', 'bus', 'train'),
+  allowNull: false,
+  defaultValue: 'louage' // 👈 tu peux définir une valeur par défaut
+},
+
+
     latitude: {
         type: DataTypes.DOUBLE,
         allowNull: false

@@ -6,6 +6,7 @@ const Ville = require('../models/Ville');
 const Station = require('../models/Station');
 const { Op } = require('sequelize');
 const sequelize = require('../config/database')
+const path = require('path');
 
 
 // Récupérer les véhicules disponibles pour le chauffeur
