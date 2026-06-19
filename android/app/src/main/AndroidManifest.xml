@@ -2,7 +2,7 @@
     package="com.example.reservation_louage_frontend">
 
     <application
-        android:label="reservation_louage_frontend"
+        android:label="TunGo"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 

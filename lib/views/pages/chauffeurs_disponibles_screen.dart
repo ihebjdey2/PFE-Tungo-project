@@ -171,48 +171,59 @@ class ChauffeursDisponiblesScreenState extends State<ChauffeursDisponiblesScreen
   }
 
   /// 🔹 Widget pour afficher la carte d'un chauffeur
-  Widget _buildChauffeurCard(ChauffeurPosition chauffeur) {
+  /// 🔹 Widget pour afficher la carte d'un chauffeur
+Widget _buildChauffeurCard(ChauffeurPosition chauffeur) {
   final isSelected = selectedChauffeur == chauffeur;
 
   return GestureDetector(
     onTap: () => setState(() {
       selectedChauffeur = isSelected ? null : chauffeur;
-      selectedPlaces = null; // Réinitialise le nombre de places lors du changement de chauffeur
+      selectedPlaces = null;
     }),
     child: AnimatedContainer(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOut,
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: isSelected ? 10 : 0),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 5,
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 6,
             offset: const Offset(0, 3),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
+                radius: 30,
                 backgroundColor: Colors.purple.withOpacity(0.1),
-                child: const Icon(Icons.person, color: Colors.purple, size: 30),
+                backgroundImage: (chauffeur.image != null && chauffeur.image!.isNotEmpty)
+                    ? NetworkImage(chauffeur.image!)
+                    : null,
+                child: (chauffeur.image == null || chauffeur.image!.isEmpty)
+                    ? const Icon(Icons.person, color: Colors.purple, size: 30)
+                    : null,
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("🚖 ${chauffeur.nom} ${chauffeur.prenom}",
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    Text(
+                      "🚖 ${chauffeur.nom} ${chauffeur.prenom}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     const SizedBox(height: 5),
                     Row(
@@ -224,6 +235,7 @@ class ChauffeursDisponiblesScreenState extends State<ChauffeursDisponiblesScreen
                             "${chauffeur.marqueVehicule} ${chauffeur.modeleVehicule} - ${chauffeur.numeroPlaque}",
                             style: const TextStyle(fontSize: 14),
                             overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ),
                       ],
@@ -233,8 +245,13 @@ class ChauffeursDisponiblesScreenState extends State<ChauffeursDisponiblesScreen
                       children: [
                         const Icon(Icons.people, color: Colors.orange, size: 18),
                         const SizedBox(width: 5),
-                        Text("Places disponibles: ${chauffeur.capacite} passagers",
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        Expanded(
+                          child: Text(
+                            "Places disponibles: ${chauffeur.capacite}",
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 5),
@@ -242,14 +259,26 @@ class ChauffeursDisponiblesScreenState extends State<ChauffeursDisponiblesScreen
                       children: [
                         const Icon(Icons.location_on, color: Colors.green, size: 18),
                         const SizedBox(width: 5),
-                        Text("Départ: ${chauffeur.villeDepart}", style: const TextStyle(fontSize: 14)),
+                        Expanded(
+                          child: Text(
+                            "Départ: ${chauffeur.villeDepart}",
+                            style: const TextStyle(fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                     Row(
                       children: [
                         const Icon(Icons.flag, color: Colors.red, size: 18),
                         const SizedBox(width: 5),
-                        Text("Destination: ${chauffeur.villeDestination}", style: const TextStyle(fontSize: 14)),
+                        Expanded(
+                          child: Text(
+                            "Destination: ${chauffeur.villeDestination}",
+                            style: const TextStyle(fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -257,9 +286,12 @@ class ChauffeursDisponiblesScreenState extends State<ChauffeursDisponiblesScreen
                       children: [
                         const Icon(Icons.access_time, color: Colors.grey, size: 16),
                         const SizedBox(width: 5),
-                        Text(
-                          "Dernière mise à jour: ${DateFormat('yyyy-MM-dd HH:mm').format(chauffeur.derniereMiseAJour)}",
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        Expanded(
+                          child: Text(
+                            "Dernière mise à jour: ${DateFormat('yyyy-MM-dd HH:mm').format(chauffeur.derniereMiseAJour)}",
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),
@@ -268,12 +300,16 @@ class ChauffeursDisponiblesScreenState extends State<ChauffeursDisponiblesScreen
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          if (isSelected) const SizedBox(height: 12),
           if (isSelected)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Sélectionnez le nombre de places :", style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  "Sélectionnez le nombre de places :",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 5),
                 DropdownButton<int>(
                   value: selectedPlaces,
                   hint: const Text("Choisir"),
@@ -283,34 +319,28 @@ class ChauffeursDisponiblesScreenState extends State<ChauffeursDisponiblesScreen
                     });
                   },
                   items: List.generate(chauffeur.capacite, (index) => index + 1)
-                      .map((e) => DropdownMenuItem<int>(value: e, child: Text("$e place(s)")))
+                      .map((e) => DropdownMenuItem<int>(
+                            value: e,
+                            child: Text("$e place(s)"),
+                          ))
                       .toList(),
                 ),
                 if (selectedPlaces != null)
-                  TweenAnimationBuilder<Alignment>(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.elasticOut,
-                    tween: AlignmentTween(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.center,
-                    ),
-                    builder: (context, alignment, child) {
-                      return Align(
-                        alignment: alignment,
-                        child: AnimatedOpacity(
-                          duration: const Duration(milliseconds: 300),
-                          opacity: 1.0,
-                          child: child,
-                        ),
-                      );
-                    },
+                  Align(
+                    alignment: Alignment.center,
                     child: ElevatedButton(
                       onPressed: () => _reserverChauffeur(chauffeur.chauffeurId),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.purple,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       ),
-                      child: const Text('Réserver', style: TextStyle(color: Colors.white, fontSize: 14)),
+                      child: const Text(
+                        'Réserver',
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
                     ),
                   ),
               ],
@@ -320,8 +350,6 @@ class ChauffeursDisponiblesScreenState extends State<ChauffeursDisponiblesScreen
     ),
   );
 }
-
-
 
 
   /// 🔹 Widget pour afficher un message d'erreur

@@ -20,14 +20,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // On met le contenu principal + FAB dans un Stack afin d'avoir le FAB flottant
+    final Widget mainContent = SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: _buildDashboardContent(),
+    );
+
+    final Widget floatingButton = Positioned(
+      right: 20,
+      bottom: 24,
+      child: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/chat'); // route vers ton écran ChatBot
+        },
+        backgroundColor: Colors.deepPurple,
+        child: const Icon(Icons.chat_bubble_outline, size: 28),
+        tooltip: 'Ouvrir le ChatBot',
+      ),
+    );
+
     return CustomScaffold(
       title: 'Espace Client',
       currentIndex: _selectedIndex,
       onTabChanged: _onItemTapped,
       showDrawer: false,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: _buildDashboardContent(),
+      // On passe un Stack comme body : contenu + FAB positionné
+      body: SizedBox(
+        // SizedBox pour s'assurer que le Stack prend bien tout l'espace disponible
+        width: double.infinity,
+        height: MediaQuery.of(context).size.height -
+            // On retire la hauteur de la barre d'app (approx) pour éviter overflow
+            kToolbarHeight -
+            MediaQuery.of(context).padding.top,
+        child: Stack(
+          children: [
+            // contenu principal (scrollable)
+            Positioned.fill(child: mainContent),
+            // Floating button positionné
+            floatingButton,
+          ],
+        ),
       ),
     );
   }
@@ -38,26 +70,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Un seul bouton de recherche qui ouvre l'interface de choix du transport
             _buildDashboardCard(
               icon: Icons.search,
               color: Colors.blue,
-              title: 'Nouvelle Recherche',
-              subtitle: 'Trouvez un trajet ou réservez un véhicule.',
-              routeName: '/recherche',
+              title: 'Recherche',
+              subtitle: 'Trouvez un trajet : louage, bus ou train.',
+              routeName: '/choix-transport', // nouvelle route intermédiaire
             ),
-            
             _buildDashboardCard(
-              icon: Icons.search,
+              icon: Icons.local_shipping,
               color: Colors.teal,
               title: 'Suivre un Colis',
               subtitle: 'Suivez votre colis en cours de livraison.',
               routeName: '/suivrecolis',
             ),
             _buildDashboardCard(
-              icon: Icons.search,
+              icon: Icons.list_alt,
               color: Colors.teal,
-              title: 'voir mes Colis',
-              subtitle: 'Suivez votre colis en cours de livraison.',
+              title: 'Voir mes Colis',
+              subtitle: 'Consultez vos colis et statuts.',
               routeName: '/colis',
             ),
           ],

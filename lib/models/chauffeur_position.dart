@@ -8,6 +8,7 @@ class ChauffeurPosition {
   final String modeleVehicule;
   final String numeroPlaque;
   final int capacite; 
+  final String? image;
   final DateTime derniereMiseAJour;
     
       
@@ -22,6 +23,7 @@ class ChauffeurPosition {
     required this.modeleVehicule,
     required this.capacite,
     required this.numeroPlaque,
+    this.image,
     required this.derniereMiseAJour,
   });
 
@@ -36,6 +38,7 @@ class ChauffeurPosition {
       modeleVehicule: json['vehicule'] != null ? json['vehicule']['modele'] ?? 'Non spécifié' : 'Non spécifié',
       numeroPlaque: json['vehicule'] != null ? json['vehicule']['numero_de_plaques'] ?? 'N/A' : 'N/A',
       capacite: json['vehicule'] != null ? json['vehicule']['capacite'] ?? 0 : 0, 
+      image: json['image'] ?? null,
       derniereMiseAJour: DateTime.tryParse(json['derniere_mise_a_jour'] ?? '') ?? DateTime.now(),
    );
   }

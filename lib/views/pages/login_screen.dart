@@ -167,17 +167,20 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 ),
               ),
               const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => ForgotPasswordScreen()),
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) =>  ForgotPasswordScreen()),
+                    ),
+                    child: const Text(
+                      'Mot de passe oublié ?',
+                      style: TextStyle(color: primaryColor),
+                    ),
                   ),
-                  child: const Text('Mot de passe oublié ?', style: TextStyle(color: primaryColor)),
                 ),
-              ),
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
+
               authViewModel.isLoading
                   ? const Center(child: CircularProgressIndicator(color: primaryColor))
                   : ElevatedButton(

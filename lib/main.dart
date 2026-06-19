@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 // Import des ViewModels
 import 'viewmodels/auth_viewmodel.dart';
@@ -7,9 +8,10 @@ import 'viewmodels/profile_viewmodel.dart';
 import 'viewmodels/recherche_viewmodel.dart';
 import 'viewmodels/reservation_viewmodel.dart';
 import 'viewmodels/colis_viewmodel.dart';
-
+import 'viewmodels/transport_viewmodel.dart';
 
 // Import des écrans
+import 'views/pages/onboarding_screen.dart';
 import 'views/pages/login_screen.dart';
 import 'views/pages/signup_screen.dart';
 import 'views/pages/dashboard_screen.dart';
@@ -25,7 +27,10 @@ import 'views/pages/EnvoyerColisScreen.dart';
 import 'views/pages/carte_test_screen.dart'; 
 import 'views/pages/mes_colis_screen.dart'; 
 import 'views/pages/suivi_colis_screen.dart'; 
-
+import 'views/pages/recherche_transport_screen.dart'; 
+import 'views/pages/transport_choice_screen.dart'; 
+import 'views/pages/splash_screen.dart'; 
+import 'views/pages/chat_screen.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,7 +56,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RechercheViewModel()),
         ChangeNotifierProvider(create: (_) => ReservationViewModel()), 
         ChangeNotifierProvider(create: (_) => ColisViewModel()), 
-
+        ChangeNotifierProvider(create: (_) => TransportViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -60,8 +65,11 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.purple,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        initialRoute: '/login', // Toujours commencer par l'écran de connexion
+        // L'onboarding sera la première page toujours
+        initialRoute: '/splash',
         routes: {
+          '/splash': (context) => const SplashScreen(),
+          '/onboarding': (context) => const OnboardingScreen(),
           '/login': (context) => LoginScreen(),
           '/signup': (context) => SignupScreen(),
           '/forgot-password': (context) => ForgotPasswordScreen(),
@@ -73,15 +81,25 @@ class MyApp extends StatelessWidget {
           '/profile': (context) => ProfileScreen(),
           '/envoyer-colis': (context) =>  EnvoyerColisScreen(), 
           '/recherche': (context) => RechercheScreen(),
+          '/chat': (context) => const ChatScreen(),
           '/reservation-actuelle': (context) => ReservationActuelleScreen(),
           '/historique': (context) =>  HistoriqueReservationsScreen(),
+          '/choix-transport': (context) => const TransportChoiceScreen(),
           '/map': (context) => MapScreen(),
           '/carte-test': (context) => CarteTestScreen(),
           '/colis': (context) => MesColisScreen(),
-
-
+          '/recherche-transport': (context) => const RechercheTransportScreen(),
         },
-        // Gestion dynamique des routes
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('fr', 'FR'),
+          Locale('en', 'US'),
+          Locale('ar', ''),
+        ],
         onGenerateRoute: (settings) {
           if (settings.name == '/chauffeurs-disponibles') {
             final args = settings.arguments as Map<String, dynamic>;
@@ -94,14 +112,13 @@ class MyApp extends StatelessWidget {
             );
           }
           if (settings.name == '/suivi-colis') {
-    final args = settings.arguments as Map<String, dynamic>;
-    return MaterialPageRoute(
-      builder: (context) => SuiviColisScreen(colis: args),
-    );
-  }
+            final args = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (context) => SuiviColisScreen(colis: args),
+            );
+          }
           return null;
         },
-        
       ),
     );
   }

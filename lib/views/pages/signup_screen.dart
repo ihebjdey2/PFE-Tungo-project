@@ -43,58 +43,79 @@ class SignupScreenState extends State<SignupScreen> {
       showBottomNavigationBar: false,
       currentIndex: 0,
       onTabChanged: (_) {},
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 6,
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  const Text(
-                    'Créer un compte',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primary),
-                  ),
-                  const SizedBox(height: 24),
-                  ..._buildTextFields(),
-                  const SizedBox(height: 16),
-                  _buildLanguePreferenceDropdown(),
-                  const SizedBox(height: 16),
-                  _buildImagePicker(),
-                  const SizedBox(height: 20),
-
-                  if (authViewModel.errorMessage != null)
-                    ErrorMessage(authViewModel.errorMessage!),
-
-                  authViewModel.isLoading
-                      ? const Loader()
-                      : SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton.icon(
-                            onPressed: _onSubmit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                            icon: const Icon(Icons.person_add_alt_1),
-                            label: const Text("S'inscrire", style: TextStyle(fontSize: 16)),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  elevation: 6,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Créer un compte',
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary),
                           ),
-                        ),
-                ],
+                          const SizedBox(height: 24),
+                          ..._buildTextFields(),
+                          const SizedBox(height: 16),
+                          _buildLanguePreferenceDropdown(),
+                          const SizedBox(height: 16),
+                          _buildImagePicker(),
+                          const SizedBox(height: 20),
+
+                          if (authViewModel.errorMessage != null)
+                            ErrorMessage(authViewModel.errorMessage!),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+
+            /// 🔥 BOUTON EN BAS DE LA PAGE
+            authViewModel.isLoading
+                ? const Loader()
+                : SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed: _onSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.person_add_alt_1, color: Colors.white),
+                      label: const Text(
+                        "S'inscrire",
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white, /// 🔥 Texte blanc
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+          ],
         ),
       ),
     );
   }
 
   void _onSubmit() async {
-    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+    final authViewModel =
+        Provider.of<AuthViewModel>(context, listen: false);
     if (_formKey.currentState?.validate() ?? false) {
       final success = await authViewModel.signup(
         nom: nomController.text.trim(),
@@ -110,9 +131,11 @@ class SignupScreenState extends State<SignupScreen> {
       if (!mounted) return;
 
       if (success) {
-        Navigator.pushReplacementNamed(context, '/login', arguments: {'email': emailController.text.trim()});
+        Navigator.pushReplacementNamed(context, '/login',
+            arguments: {'email': emailController.text.trim()});
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Inscription réussie. Veuillez vous connecter.')),
+          const SnackBar(
+              content: Text('Inscription réussie. Veuillez vous connecter.')),
         );
       }
     }
@@ -122,26 +145,32 @@ class SignupScreenState extends State<SignupScreen> {
     return [
       _buildTextField(nomController, 'Nom'),
       _buildTextField(prenomController, 'Prénom'),
-      _buildTextField(emailController, 'Email', keyboardType: TextInputType.emailAddress),
-      _buildTextField(passwordController, 'Mot de passe', obscureText: true),
-      _buildTextField(numeroDeTelephoneController, 'Téléphone', keyboardType: TextInputType.phone),
+      _buildTextField(emailController, 'Email',
+          keyboardType: TextInputType.emailAddress),
+      _buildTextField(passwordController, 'Mot de passe',
+          obscureText: true),
+      _buildTextField(numeroDeTelephoneController, 'Téléphone',
+          keyboardType: TextInputType.phone),
       _buildTextField(adresseController, 'Adresse'),
     ];
   }
 
   Widget _buildTextField(TextEditingController controller, String label,
-      {TextInputType keyboardType = TextInputType.text, bool obscureText = false}) {
+      {TextInputType keyboardType = TextInputType.text,
+      bool obscureText = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
         obscureText: obscureText,
-        validator: (value) => (value == null || value.isEmpty) ? 'Champ requis' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'Champ requis' : null,
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(_getIconForLabel(label)),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          border:
+              OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
     );
@@ -184,30 +213,51 @@ class SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildImagePicker() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("Photo de profil", style: TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 10),
-        Center(
-          child: _selectedImage != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.file(_selectedImage!, height: 120, width: 120, fit: BoxFit.cover),
-                )
-              : const Icon(Icons.image, size: 80, color: Colors.grey),
-        ),
-        const SizedBox(height: 12),
-        ElevatedButton.icon(
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        "Photo de profil",
+        style: TextStyle(fontWeight: FontWeight.w600),
+      ),
+      const SizedBox(height: 10),
+
+      /// --- Aperçu de l'image (déjà centré, parfait)
+      Center(
+        child: _selectedImage != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.file(
+                  _selectedImage!,
+                  height: 120,
+                  width: 120,
+                  fit: BoxFit.cover,
+                ),
+              )
+            : const Icon(Icons.image, size: 80, color: Colors.grey),
+      ),
+
+      const SizedBox(height: 12),
+
+      /// --- 🔥 BOUTON CENTRÉ ICI 🔥
+      Center(
+        child: ElevatedButton.icon(
           onPressed: _pickImage,
-          icon: const Icon(Icons.photo),
-          label: const Text('Choisir une image'),
+          icon: const Icon(Icons.photo, color: Colors.white),
+          label: const Text(
+            'Choisir une image',
+            style: TextStyle(color: Colors.white),
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 }
